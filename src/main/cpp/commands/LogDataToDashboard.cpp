@@ -5,27 +5,16 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/ExtendClimber.h"
-
-ExtendClimber::ExtendClimber(Climber *climber) : m_climber(climber) {
+#include "commands/LogDataToDashboard.h"
+LogDataToDashboard::LogDataToDashboard(Shooter* shooter) {
   // Use addRequirements() here to declare subsystem dependencies.
-  AddRequirements(climber);
 }
-
-#ifdef ENABLE_CLIMBER
-// Called when the command is initially scheduled.
-void ExtendClimber::Initialize() {}
 
 // Called repeatedly when this Command is scheduled to run
-void ExtendClimber::Execute() {
-  m_climber->ExtendClimber(); // Moved speed to subsystem
+void LogDataToDashboard::Execute() {
+#ifdef ENABLE_SHOOTER
+  //shooter subsystem
+  //  frc::SmartDashboard::PutNumber("Top Motor Speed", shooter->GetTopMotorSpeed());
+  //  frc::SmartDashboard::PutNumber("Bottom Motor Speed", shooter->GetBottomMotorSpeed());
+#endif // ENABLE_SHOOTER
 }
-
-// Called once the command ends or is interrupted.
-void ExtendClimber::End(bool interrupted) {
-  m_climber->StopClimber();
-}
-
-// Returns true when the command should end.
-bool ExtendClimber::IsFinished() { return false; }
-#endif // ENABLE_CLIMBER

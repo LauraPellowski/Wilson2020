@@ -12,14 +12,22 @@ JumbleShooter::JumbleShooter(Shooter *shooter) : m_shooter(shooter) {
   AddRequirements(shooter);
 }
 
+#ifdef ENABLE_SHOOTER
 // Called when the command is initially scheduled.
 void JumbleShooter::Initialize() {}
 
 // Called repeatedly when this Command is scheduled to run
-void JumbleShooter::Execute() {}
+void JumbleShooter::Execute() {
+  m_shooter->Activate();
+  //m_shooter->SetHopperSpeed(ConShooter::Hopper::MOTOR_SPEED);
+}
 
 // Called once the command ends or is interrupted.
-void JumbleShooter::End(bool interrupted) {}
+void JumbleShooter::End(bool interrupted) {
+    m_shooter->Deactivate();
+    //m_shooter->SetHopperSpeed(0.0);
+}
 
 // Returns true when the command should end.
 bool JumbleShooter::IsFinished() { return false; }
+#endif // ENABLE_SHOOTER

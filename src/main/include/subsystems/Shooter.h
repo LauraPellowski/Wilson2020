@@ -14,10 +14,62 @@
 #include <rev/CANSparkMax.h>
 #include <ctre/Phoenix.h>
 #include <TimeOfFlight.h>
+#include <frc/Encoder.h>
+#include <frc/shuffleboard/Shuffleboard.h>
+#include <frc/shuffleboard/ShuffleboardTab.h>
+#include <networktables/NetworkTableEntry.h>
+
+namespace ConShooter {
+    namespace Top {
+        constexpr int MOTOR_ID = 6;
+        constexpr int WHEEL_SIZE = 4; //in inches
+        constexpr double VELOCITY_FACTOR = 1; //(ConMath::PI*WHEEL_SIZE) * ConMath::METERS_2_INCH * ConMath::MINUTES_2_SECONDS; //(velocity) y [m/s] = PI*WHEEL_SIZE * m/in * 1/60 * x [RPM]
+        constexpr double MOTOR_SPEED = 0.5;
+        constexpr double OPTIMAL_RPM = 1600.0; // Calibrated RPM from Saturday testing
+        constexpr double MAX_RPM = 4000.0;
+        //PID gains
+        constexpr double P = 2e-4;
+        constexpr double I = 0.0;
+        constexpr double D = 2e-3;
+        constexpr double FF = 1.7e-4;
+    }
+    namespace Bottom {
+        constexpr int MOTOR_ID = 9;
+        constexpr int WHEEL_SIZE = 6; //in inches
+        constexpr double VELOCITY_FACTOR = 1; //(ConMath::PI*WHEEL_SIZE) * ConMath::METERS_2_INCH * ConMath::MINUTES_2_SECONDS; //(velocity) y [m/s] = PI*WHEEL_SIZE * m/in * 1/60 * x [RPM]
+        constexpr double MOTOR_SPEED = 0.5;
+        constexpr double OPTIMAL_RPM = 3100.0; // Calibrated RPM from Saturday testing
+        constexpr double MAX_RPM = 4000.0;
+         //PID gains
+        constexpr double P = 2e-4;
+        constexpr double I = 0.0;
+        constexpr double D = 2e-3;
+        constexpr double FF = 1.7e-4;
+    }
+    namespace Feeder {
+        constexpr int MOTOR_ID = 7;
+        constexpr double MOTOR_SPEED = 0.5;
+    }
+    namespace Hopper {
+        constexpr int MOTOR_ID = 1;
+        constexpr int MOTOR_SPEED = 2.0/3.0;
+    }
+}
 
 class Shooter : public frc2::SubsystemBase {
  public:
   Shooter();
+  frc::ShuffleboardTab *m_sbt_Shooter;
+  nt::NetworkTableEntry m_nte_TopMotorRPM; // TARGET value
+  nt::NetworkTableEntry m_nte_BottomMotorRPM; // TARGET value
+
+  nt::NetworkTableEntry m_nte_TopMotorInputRPM; // TARGET value
+  nt::NetworkTableEntry m_nte_BottomMotorInputRPM; // TARGET value
+  nt::NetworkTableEntry m_nte_TopMotorOutputRPM; // Actual value
+  nt::NetworkTableEntry m_nte_BottomMotorOutputRPM; // Actual value
+
+  nt::NetworkTableEntry m_nte_FeederMotorSpeed;
+  nt::NetworkTableEntry m_nte_HopperMotorSpeed;
 
 #ifdef ENABLE_SHOOTER
   /**
@@ -35,15 +87,15 @@ class Shooter : public frc2::SubsystemBase {
 
   void SpinUp();
 
-  void SpinTop();
+  //void SpinTop();
 
-  void SpinBottom();
+  //void SpinBottom();
   
   void StopSpinUp();
 
-  void StopTop();
+  //void StopTop();
 
-  void StopBottom();
+  //void StopBottom();
 
   void Activate();
 
@@ -51,7 +103,8 @@ class Shooter : public frc2::SubsystemBase {
 
   void SetFeedSpeed(double speed);
 
-  void SetHopperSpeed(double speed);
+  // Hopper is covered by Activate/Deactivate
+  //void SetHopperSpeed(double speed);
 
  private:
   // Components (e.g. motor controllers and sensors) should generally be

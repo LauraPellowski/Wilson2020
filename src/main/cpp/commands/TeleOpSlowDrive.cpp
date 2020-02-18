@@ -5,27 +5,23 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/ExtendClimber.h"
+#include "commands/TeleOpSlowDrive.h"
 
-ExtendClimber::ExtendClimber(Climber *climber) : m_climber(climber) {
+TeleOpSlowDrive::TeleOpSlowDrive(DriveTrain *drivetrain) : m_driveTrain(drivetrain) {
   // Use addRequirements() here to declare subsystem dependencies.
-  AddRequirements(climber);
+  AddRequirements(drivetrain);
 }
 
-#ifdef ENABLE_CLIMBER
+#ifdef ENABLE_DRIVETRAIN
 // Called when the command is initially scheduled.
-void ExtendClimber::Initialize() {}
-
-// Called repeatedly when this Command is scheduled to run
-void ExtendClimber::Execute() {
-  m_climber->ExtendClimber(); // Moved speed to subsystem
+void TeleOpSlowDrive::Initialize() {
+  double max_output = m_driveTrain->GetMaxOutput() * 0.5;
+  m_driveTrain->SetMaxOutput(max_output);
 }
 
 // Called once the command ends or is interrupted.
-void ExtendClimber::End(bool interrupted) {
-  m_climber->StopClimber();
+void TeleOpSlowDrive::End(bool interrupted) {
+  double max_output = m_driveTrain->GetMaxOutput() * 2.0;
+  m_driveTrain->SetMaxOutput(max_output);
 }
-
-// Returns true when the command should end.
-bool ExtendClimber::IsFinished() { return false; }
-#endif // ENABLE_CLIMBER
+#endif // ENABLE_DRIVETRAIN

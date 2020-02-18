@@ -9,20 +9,40 @@
 
 #include <frc2/command/SubsystemBase.h>
 #include <ctre/Phoenix.h>
-#include <frc/Encoder.h>
+#include <rev/CANSparkMax.h>
+#include <frc/DutyCycleEncoder.h>
+#include <frc/shuffleboard/Shuffleboard.h>
+#include <frc/shuffleboard/ShuffleboardTab.h>
+#include <frc/XboxController.h>
+
 #include "Constants.h"
 
+namespace ConClimber {
+    // Motor
+    constexpr int MOTOR_ID = 1; // 9?;
+    constexpr double EXT_SPEED = -0.5; // CRE 02-10 Negative motor input should extend
+    constexpr double RET_SPEED = 0.5; // CRE 02-10 Positive motor input should retract
+    constexpr double ROTATION_DISTANCE = 3.75; // inches #35 Chain = .375 pitch x 10 tooth = 3.75 inches
+    constexpr double EXT_LIMIT = -31.0; // inches FIXME: Guesstimate in inches
+    constexpr double RET_LIMIT = -1.6023; // Starting Configuration: fully retracted, Encoder=0
+}
 
 class Climber : public frc2::SubsystemBase {
  public:
   Climber();
 
 #ifdef ENABLE_CLIMBER
-  void ExtendClimber(double speed);
+  frc::ShuffleboardTab *m_tabClimber;
 
-  void RetractClimber(double speed);
+  void ExtendClimber();
+
+  void RetractClimber();
 
   void StopClimber();
+
+  void ResetEncoder();
+
+  void Go(double speed);
 
   /**
    * Will be called periodically whenever the CommandScheduler runs.
@@ -32,6 +52,11 @@ class Climber : public frc2::SubsystemBase {
  private:
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
-  WPI_TalonSRX m_motor{ConClimber::MOTOR_ID};
+  //TalonSRX m_motor{ConClimber::MOTOR_ID};
+  rev::CANSparkMax m_motor{ConClimber::MOTOR_ID, rev::CANSparkMax::MotorType::kBrushless}; //Replace with SparkMAX
+  frc::DutyCycleEncoder m_dutyCycleEncoder{0};
+  nt::NetworkTableEntry m_tabClimberDistance;
+  double m_climberPosition;
+  frc::XboxController codriver_control{ConXBOXControl::CODRIVER_CONTROLLER_PORT};
 #endif // ENABLE_CLIMBER
 };

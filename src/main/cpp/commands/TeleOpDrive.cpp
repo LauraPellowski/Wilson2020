@@ -6,6 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "commands/TeleOpDrive.h"
+#include <frc/smartdashboard/SmartDashboard.h>
 
 TeleOpDrive::TeleOpDrive(DriveTrain *drivetrain,
                          std::function<double()> speed,
@@ -23,7 +24,25 @@ void TeleOpDrive::Initialize() {}
 
 // Called repeatedly when this Command is scheduled to run
 void TeleOpDrive::Execute() {
-  m_driveTrain->ArcadeDrive(m_speed(), m_rotation());
+  // Digital filter lengths- between 1.0 (no filter) and 20.0 (90% at 1 second) (11.0 is 90% at 0.5 sec)
+  // Idea from simple filter at https://www.chiefdelphi.com/t/moderating-acceleration-deceleration/77960/4
+  double speedN = m_driveTrain->m_nte_DriveSpeedFilter.GetDouble(15.0);
+  double rotationN = m_driveTrain->m_nte_DriveRotationFilter.GetDouble(15.0);
+  if (speedN < 1.0) { speedN = 1.0; }
+  if (rotationN < 1.0) { rotationN = 1.0; }
+  double speed = (((speedN - 1.0) * m_speedOut) + m_speed()) / speedN;
+  double rotation = (((rotationN - 1.0) * m_rotationOut) + m_rotation()) / rotationN;
+
+  m_driveTrain->ArcadeDrive(speed, rotation);
+
+  m_speedOut = speed;
+  m_rotationOut = rotation;
+
+  // Options for more accurate time:
+  //frc::RobotController::GetFPGATime()/1000
+  // For Linear Filters:
+  // From https://docs.wpilib.org/en/latest/docs/software/advanced-control/filters/linear-filter.html#creating-a-linearfilter
+  //frc::LinearFilter<double> filter = frc::LinearFilter<double>::SinglePoleIIR(0.1_s, 0.02_s);
 }
 
 // Called once the command ends or is interrupted.

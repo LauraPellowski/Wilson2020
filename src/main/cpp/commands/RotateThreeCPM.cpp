@@ -13,8 +13,10 @@
 RotateThreeCPM::RotateThreeCPM(ControlPanelManipulator *controlpanelmanipulator) : m_controlPanelManipulator(controlpanelmanipulator) {
   // Use addRequirements() here to declare subsystem dependencies.
   AddRequirements(controlpanelmanipulator);
+#ifdef ENABLE_CONTROL_PANEL_MANIPULATOR
   frc::Shuffleboard::SelectTab(ConShuffleboard::ControlPanelManipulatorTab);
-  m_rotationCount = m_controlPanelManipulator->m_tabCPM->Add("Transition Count", 0).GetEntry();
+  m_rotationCount = m_controlPanelManipulator->m_sbt_CPM->Add("Transition Count", 0).GetEntry();
+#endif // ENABLE_CONTROL_PANEL_MANIPULATOR
 }
 #ifdef ENABLE_CONTROL_PANEL_MANIPULATOR
 // Called when the command is initially scheduled.
@@ -41,6 +43,7 @@ void RotateThreeCPM::End(bool interrupted) {
 
 // Returns true when the command should end.
 bool RotateThreeCPM::IsFinished() {
+  //FIXME: Still need to get the target from the Shuffleboard tab and put the transition count to the Shuffleboard tab
 //  unsigned int targetCount = frc::SmartDashboard::GetNumber("Rotation Target", 28);  // Should get from Main Robot Tab
   unsigned int targetCount=28;
   if (m_transitionCount > targetCount) { // HACK: We are UNDERcounting. Catching abt 6 changes per rotation
