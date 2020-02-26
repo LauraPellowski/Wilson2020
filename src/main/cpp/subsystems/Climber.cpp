@@ -48,13 +48,29 @@ void Climber::ResetEncoder() {
 
 // Used only by OperateManualClimber
 void Climber::Go(double speed) {
-  if (!m_Locked) {
+  // If lock is engaged, OR we're beyond the encoder soft limits, DON'T RUN
+  if (m_Locked) { 
+    m_motor.Set(0.0);
+  }
+
+  // If Green Switch is active (Up/On), IGNORE encoder limits *** DANGER ****
+  else if ((m_codriver_control != nullptr) && 
+      (m_codriver_control->GetRawButton(ConLaunchPad::Switch::GREEN))) { // Nearest to climber controls
+      m_motor.Set(speed);
+  }
+  // Extend = Decreasing/More Negative
+  else if (speed < 0.0 && m_climberPosition > ConClimber::EXT_LIMIT) {
+    printf("Extending...\n");
+    m_motor.Set(speed);
+  }
+  // Retract = Increasing/More Positive
+  else if (speed > 0.0 && m_climberPosition < ConClimber::RET_LIMIT) {
+    printf("Retracting...\n");
     m_motor.Set(speed);
   }
   else {
-    m_motor.Set(0.0);
+    m_motor.Set(0.0); // Fail Safe
   }
-  //m_motor.Set(ControlMode::PercentOutput, speed); // If we're using a Talon 
 }
 
 // Used only by OperateManualClimber
