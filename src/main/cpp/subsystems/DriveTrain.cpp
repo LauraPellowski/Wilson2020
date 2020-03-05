@@ -30,18 +30,18 @@ DriveTrain::DriveTrain() {
   m_sbt_DriveTrain = &frc::Shuffleboard::GetTab(ConShuffleboard::DriveTrainTab);
 
   // Create widgets for digital filter lengths
-  m_nte_DriveSpeedFilter    = m_sbt_DriveTrain->AddPersistent("Drive Speed Filter", 15.0)   .WithSize(2, 1).WithPosition(0, 0).GetEntry();
+  m_nte_DriveSpeedFilter    = m_sbt_DriveTrain->AddPersistent("Drive Speed Filter", 10.0)   .WithSize(2, 1).WithPosition(0, 0).GetEntry();
   m_nte_DriveRotationFilter = m_sbt_DriveTrain->AddPersistent("Drive Rotation Filter", 5.0) .WithSize(2, 1).WithPosition(0, 1).GetEntry();
 
   // Create widget for non-linear input
   m_nte_InputExponent       = m_sbt_DriveTrain->AddPersistent("Input Exponent", 1.0)        .WithSize(1, 1).WithPosition(0, 2).GetEntry();
 
   // Create widgets for AutoDrive
-  m_nte_a_DriveDelay        = m_sbt_DriveTrain->AddPersistent("Drive Delay", 0.0)           .WithSize(1, 1).WithPosition(1, 0).GetEntry();
-  m_nte_b_DriveDistance     = m_sbt_DriveTrain->AddPersistent("Drive Distance", 0.0)        .WithSize(1, 1).WithPosition(1, 1).GetEntry();
-  m_nte_c_ShooterSpinTime   = m_sbt_DriveTrain->AddPersistent("Shooter Spin Time", 0.0)     .WithSize(1, 1).WithPosition(1, 2).GetEntry();
-  m_nte_d_JumblerDelay      = m_sbt_DriveTrain->AddPersistent("Jumbler Delay ", 0.0)        .WithSize(1, 1).WithPosition(1, 3).GetEntry();
-  m_nte_e_JumblerOnTime     = m_sbt_DriveTrain->AddPersistent("Jumbler On Time", 0.0)       .WithSize(1, 1).WithPosition(1, 4).GetEntry();
+  m_nte_a_DriveDelay        = m_sbt_DriveTrain->AddPersistent("a Drive Delay", 0.0)         .WithSize(1, 1).WithPosition(1, 0).GetEntry();
+  m_nte_b_DriveDistance     = m_sbt_DriveTrain->AddPersistent("b Drive Distance", -44.0)    .WithSize(1, 1).WithPosition(1, 1).GetEntry();
+  m_nte_c_ShooterSpinTime   = m_sbt_DriveTrain->AddPersistent("c Shooter Spin Time", 10.0)  .WithSize(1, 1).WithPosition(1, 2).GetEntry();
+  m_nte_d_JumblerDelay      = m_sbt_DriveTrain->AddPersistent("d Jumbler Delay ", 5.0)      .WithSize(1, 1).WithPosition(1, 3).GetEntry();
+  m_nte_e_JumblerOnTime     = m_sbt_DriveTrain->AddPersistent("e Jumbler On Time", 15.0)    .WithSize(1, 1).WithPosition(1, 4).GetEntry();
 }
 
 #ifdef ENABLE_DRIVETRAIN
@@ -77,16 +77,17 @@ void DriveTrain::ResetEncoders() {
 }
 
 // FIXME: Account for two encoders per side
-//double DriveTrain::GetRightDistance() {
-//  return (m_rightEncoderA.GetPosition() * ConDriveTrain::ENCODER_TICKS_TO_INCHES) + ConDriveTrain::ENCODER_TICKS_OFFSET;
-//}
+double DriveTrain::GetRightDistance() {
+  return (m_rightEncoderA.GetPosition() * ConDriveTrain::ENCODER_2_IN);
+}
 
-//double DriveTrain::GetLeftDistance() {
-//  return (m_leftEncoderA.GetPosition() * ConDriveTrain::ENCODER_TICKS_TO_INCHES) + ConDriveTrain::ENCODER_TICKS_OFFSET;
-//}
+double DriveTrain::GetLeftDistance() {
+  return (m_leftEncoderA.GetPosition() * ConDriveTrain::ENCODER_2_IN);
+}
 
 // Used by AutoDriveDistance
 double DriveTrain::GetAverageEncoderDistance() {
-  return (m_leftEncoderA.GetPosition() + m_rightEncoderA.GetPosition()) / 2.0;
+  // return (m_leftEncoderA.GetPosition() - m_rightEncoderA.GetPosition()) / 2.0;
+  return ((GetLeftDistance() - GetRightDistance()) / 2.0)/ 13.16; // FIXME: Fudge Factor 
 }
 #endif // ENABLE_DRIVETRAIN

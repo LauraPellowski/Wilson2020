@@ -18,6 +18,7 @@
 #include <frc/shuffleboard/Shuffleboard.h>
 #include <frc/shuffleboard/ShuffleboardTab.h>
 #include <networktables/NetworkTableEntry.h>
+#include <frc/XBoxController.h>
 
 namespace ConShooter {
     namespace Top {
@@ -40,6 +41,8 @@ namespace ConShooter {
         constexpr double MOTOR_SPEED = 0.5;
         constexpr double OPTIMAL_RPM = 3100.0; // Calibrated RPM from Saturday testing
         constexpr double MAX_RPM = 4000.0;
+        constexpr double RPM_FINE_TUNE = 200.0; 
+
          //PID gains
         constexpr double P = 2e-4;
         constexpr double I = 0.0;
@@ -51,17 +54,22 @@ namespace ConShooter {
         constexpr double MOTOR_SPEED = 0.5;
         constexpr double OPTIMAL_RPM = 3500.00; // RPM 
         // PID gains
-        constexpr double P = 0.0;
+        constexpr double P = 1.0;
         constexpr double I = 0.0;
-        constexpr double D = 0.0;
+        constexpr double D = 250.0;
         constexpr double F = 0.0;
+        // Current Limits
+        constexpr int CONT_CURRENT_LIMIT = 20; // Amps (continuous)
+        constexpr int PEAK_CURRENT_LIMIT = 30;     // Amps
+        constexpr int PEAK_CURRENT_DURATION = 200; // mSec
+
     }
     namespace Jumbler {
         constexpr int MOTOR_ID = 1;
         constexpr double MOTOR_SPEED = 0.5;
     }
     namespace HopperFlapper {
-        constexpr int MOTOR_ID = 3;
+        constexpr int MOTOR_ID = 2;
         constexpr double MOTOR_SPEED = 0.5;
     }
 }
@@ -80,9 +88,10 @@ class Shooter : public frc2::SubsystemBase {
   nt::NetworkTableEntry m_nte_KickerInputRPM;
   nt::NetworkTableEntry m_nte_KickerMotorSpeed;
   nt::NetworkTableEntry m_nte_KickerMotorVoltage;
+  nt::NetworkTableEntry m_nte_KickerMotorError;
 
   nt::NetworkTableEntry m_nte_JumblerMotorSpeed;
-  nt::NetworkTableEntry m_nte_JumblerStatus;
+//  nt::NetworkTableEntry m_nte_JumblerStatus;
 
 #ifdef ENABLE_SHOOTER
   /**
@@ -100,6 +109,8 @@ class Shooter : public frc2::SubsystemBase {
 
   double GetKickerMotorVoltage();
 
+  double GetKickerError();
+
   void SpinUp();
 
   void StopSpinUp();
@@ -108,7 +119,15 @@ class Shooter : public frc2::SubsystemBase {
 
   void Dejumble();
 
+  void FlapHopper();
+
+  void StopFlapper();
+
   void SetKickerSpeed(double speed);
+
+  void SetCodriverControl(frc::XboxController *codriver_control);
+
+  frc::XboxController *m_codriver_control = nullptr;
 
  private:
   // Components (e.g. motor controllers and sensors) should generally be

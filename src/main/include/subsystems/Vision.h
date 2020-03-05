@@ -11,12 +11,15 @@
 #include <frc2/command/SubsystemBase.h>
 #include <networktables/NetworkTable.h>
 #include <networktables/NetworkTableInstance.h>
+#include <frc/shuffleboard/Shuffleboard.h>
+#include <frc/shuffleboard/ShuffleboardTab.h>
+#include <networktables/NetworkTableEntry.h>
 
 namespace ConVision {
     namespace AlignToPlayerStation {
-        constexpr float P = 0.15;
-        constexpr float I = 0.0;
-        constexpr float D = 0.0;
+        constexpr double P = 0.15;
+        constexpr double I = 0.0;
+        constexpr double D = 0.0;
     }
     constexpr int ON = 3;
     constexpr int BLINK = 2;
@@ -36,7 +39,7 @@ class Vision : public frc2::SubsystemBase {
   double Align();
 
   void ToggleLight();
-  
+
   void LightOn();
 
   void LightOff();
@@ -46,12 +49,19 @@ class Vision : public frc2::SubsystemBase {
   void SelectNearGoalPipeline();
 
   void SelectFarGoalPipeline();
-  
+
 #endif // ENABLE_VISION
 
  private:
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
   std::shared_ptr<NetworkTable> m_nt_Limelight;
-  float m_nte_tx;
+
+ public:
+  frc::ShuffleboardTab *m_sbt_Vision;
+  nt::NetworkTableEntry m_nte_Align_P;
+  nt::NetworkTableEntry m_nte_Align_I;
+  nt::NetworkTableEntry m_nte_Align_D;
+
+  double m_nte_tx;
 };

@@ -23,6 +23,8 @@
 #include "commands/RotateManualCPM.h"
 #include "commands/JumbleShooter.h"
 #include "commands/LogDataToDashboard.h" 
+#include "commands/AutoDriveDistance.h"
+#include "commands/FlapHopper.h"
 
 #include "RobotContainer.h"
 
@@ -46,10 +48,25 @@ RobotContainer::RobotContainer() : m_autoDrive(&m_driveTrain, &m_shooter), m_loc
   // Make climber aware of operator input
   m_climber.SetCodriverControl(&codriver_control);
 #endif // ENABLE_CLIMBER
+
+#ifdef ENABLE_SHOOTER
+  // Make shooter aware of operator input
+  m_shooter.SetCodriverControl(&codriver_control);
+#endif // ENABLE_SHOOTER
+
 }
 
 void RobotContainer::ConfigureButtonBindings() {
   // Configure your button bindings here
+
+#if 0 // Testing AutoDriveDistance
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::A); }).WhenPressed(new AutoDriveDistance(&m_driveTrain, 10.0), false);
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::B); }).WhenPressed(new AutoDriveDistance(&m_driveTrain, -10.0), false);
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::X); }).WhenPressed(new AutoDriveDistance(&m_driveTrain, 100.0), false);
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::Y); }).WhenPressed(new AutoDriveDistance(&m_driveTrain, -100.0), false);
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::SELECT); }).WhenPressed(new AutoDriveDistance(&m_driveTrain, 1000.0), false);
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::START); }).WhenPressed(new AutoDriveDistance(&m_driveTrain, -1000.0), false);
+#endif
 
 #ifdef ENABLE_DRIVETRAIN
   // Commence reduced speed driving when bumper(s) pressed
@@ -73,14 +90,16 @@ void RobotContainer::ConfigureButtonBindings() {
 
   frc2::Button([this] {return codriver_control.GetRawButton(ConLaunchPad::Button::RED); }).WhileHeld(new JumbleShooter(&m_shooter, -1));
   frc2::Button([this] {return codriver_control.GetRawButton(ConLaunchPad::Button::BLUE); }).WhileHeld(new JumbleShooter(&m_shooter, 1));
+  frc2::Button([this] {return codriver_control.GetRawButton(ConLaunchPad::Button::YELLOW); }).WhileHeld(new FlapHopper(&m_shooter));
+
 #endif // ENABLE_SHOOTER
 
 #ifdef ENABLE_VISION
   // Vision
-  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::SELECT); }).WhenHeld(new AlignToPlayerStationPID(&m_vision, &m_driveTrain));
-  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::START); }).WhenHeld(new AlignToPowerPortPID(&m_vision, &m_driveTrain));
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::SELECT); }).WhileHeld(new AlignToPlayerStationPID(&m_vision, &m_driveTrain));
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::START); }).WhileHeld(new AlignToPowerPortPID(&m_vision, &m_driveTrain));
   frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::X); }).WhenHeld(new SwitchCamera(&m_vision));
-  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::Y); }).WhenHeld(new ToggleVisionLight(&m_vision));
+  frc2::Button([this] {return driver_control.GetRawButton(ConXBOXControl::Y); }).WhenPressed(new ToggleVisionLight(&m_vision));
 #endif // ENABLE_VISION
 
 #ifdef ENABLE_CONTROL_PANEL_MANIPULATOR
